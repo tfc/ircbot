@@ -1,7 +1,7 @@
 EXECUTABLE=bot
-OBJECTS=main.o
+OBJECTS=main.o irc.o
 CFLAGS:=-g -Wall
-TESTSERVER=127.0.0.1
+TESTSERVER=localhost
 #TESTSERVER=clanserver4u1.de.quakenet.org
 
 all: $(EXECUTABLE)
