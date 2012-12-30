@@ -1,6 +1,6 @@
 EXECUTABLE=bot
 OBJECTS=main.o irc.o
-CFLAGS:=-g -Wall
+CFLAGS:=-g -Wall -Werror
 TESTSERVER=localhost
 #TESTSERVER=clanserver4u1.de.quakenet.org
 
