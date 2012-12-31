@@ -8,14 +8,17 @@
 #include <netinet/in.h>
 #include <netdb.h> 
 
+#include "helpers.h"
 #include "irc.h"
 
 #define IRC_BUFFER_SIZE 4096
 
-#define MIN(a,b) \
-   ({ __typeof__ (a) _a = (a); \
-       __typeof__ (b) _b = (b); \
-     _a < _b ? _a : _b; })
+#define Irc_send(con, ...) do { \
+	char *sendmsg; \
+	asprintf(&sendmsg, __VA_ARGS__); \
+	send_string(con, sendmsg); \
+	free(sendmsg); \
+} while(0)
 
 #if 0
 static void dump_buffer(irc_connection *con)
@@ -80,33 +83,19 @@ void irc_close(irc_connection *con, char *qmsg)
 {
 	assert(con);
 
-	char *msg;
-	if (qmsg) asprintf(&msg, "QUIT :%s\n", qmsg);
-	else msg = strdup("QUIT\n");
-	send_string(con, msg);
-	free(msg);
+	if (qmsg) Irc_send(con, "QUIT :%s\n", qmsg);
+	else Irc_send(con, "QUIT\n");
 
-	free(con->buf);
-	free(con->nick);
-	free(con->username);
-	free(con->hostname);
-	free(con->servername);
-	free(con->realname);
+	Free_list(con->buf, con->nick, con->username, con->hostname, con->servername, con->realname);
 	close(con->sockfd);
 }
 
 int irc_set_nick(irc_connection *con, const char *nick)
 {
-	char *sendmsg;
-
 	con->nick = strdup(nick);
 	strcpy(con->nick, nick);
 
-	asprintf(&sendmsg, "NICK %s\n", con->nick);
-	if (!sendmsg) return 1;
-
-	send_string(con, sendmsg);
-	free(sendmsg);
+	Irc_send(con, "NICK %s\n", con->nick);
 
 	return 0;
 }
@@ -121,18 +110,11 @@ int irc_set_user(irc_connection *con,
 	con->realname = strdup(realname);
 
 	if (!con->username || !con->hostname || !con->servername || !con->realname) {
-		free(con->username);
-		free(con->hostname);
-		free(con->servername);
-		free(con->realname);
+		Free_list(con->username, con->hostname, con->servername, con->realname);
 		return 1;
 	}
 
-	char *sendmsg;
-	asprintf(&sendmsg, "USER %s %s %s :%s\n", 
-			username, hostname, servername, realname);
-	send_string(con, sendmsg);
-	free(sendmsg);
+	Irc_send(con, "USER %s %s %s :%s\n", username, hostname, servername, realname);
 
 	return 0;
 }
