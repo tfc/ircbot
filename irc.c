@@ -76,10 +76,15 @@ int irc_connect(irc_connection *con, char *hostname, int port)
 	return 0;
 }
 
-void irc_close(irc_connection *con)
+void irc_close(irc_connection *con, char *qmsg)
 {
 	assert(con);
-	send_string(con, "QUIT\n");
+
+	char *msg;
+	if (qmsg) asprintf(&msg, "QUIT :%s\n", qmsg);
+	else msg = strdup("QUIT\n");
+	send_string(con, msg);
+	free(msg);
 
 	free(con->buf);
 	free(con->nick);

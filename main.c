@@ -10,7 +10,6 @@
 int main(int argc, char *argv[])
 {
 	int err;
-	//char buffer[512];
 	irc_connection con;
 
 	err = irc_connect(&con, argv[1], atoi(argv[2]));
@@ -23,7 +22,7 @@ int main(int argc, char *argv[])
 	irc_set_user(&con, "cbot_user", "cbot_host", "cbot_servername", "CBot Real Name");
 
 	do {
-		wait_fill_buffer(&con);
+		err = wait_fill_buffer(&con);
 		int msgs = irc_messages_pending(&con);
 
 		while (msgs--) {
@@ -31,7 +30,7 @@ int main(int argc, char *argv[])
 			printf("<-- %s\n", msg);
 			free(msg);
 		}
-	} while (1);
+	} while (err);
 
-	irc_close(&con);
+	irc_close(&con, "bye.");
 }
