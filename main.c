@@ -9,26 +9,29 @@
 
 int main(int argc, char *argv[])
 {
-	int sockfd;
-	char buffer[512];
+	int err;
+	//char buffer[512];
+	irc_connection con;
 
-	sockfd = connect_to_irc(argv[1], atoi(argv[2]));
-	if (sockfd <= 0) {
+	err = irc_connect(&con, argv[1], atoi(argv[2]));
+	if (err) {
 		fprintf(stderr, "Got no connection.");
 		exit(1);
 	}
 
-	send_string(sockfd, "NICK cbot\n");
-	send_string(sockfd, "USER cbot_user cbot_host cbot_servername :CBot Real Name\n");
+	irc_set_nick(&con, "cbot");
+	irc_set_user(&con, "cbot_user", "cbot_host", "cbot_servername", "CBot Real Name");
 
-	recv_string(sockfd, buffer);
-	printf("%s\n",buffer);
+	do {
+		wait_fill_buffer(&con);
+		int msgs = irc_messages_pending(&con);
 
-	/*
-	printf("Please enter a message: ");
-	fgets(buffer, 512, stdin);
-	send_string(sockfd, buffer);
-	*/
-	
-	close(sockfd);
+		while (msgs--) {
+			char *msg = irc_next_message(&con);
+			printf("<-- %s\n", msg);
+			free(msg);
+		}
+	} while (1);
+
+	irc_close(&con);
 }
