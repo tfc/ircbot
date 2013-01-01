@@ -10,6 +10,7 @@
 
 #include "helpers.h"
 #include "irc.h"
+#include "irc_codes.h"
 
 #define IRC_BUFFER_SIZE 4096
 
