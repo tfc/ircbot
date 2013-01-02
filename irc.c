@@ -21,25 +21,6 @@
 	free(sendmsg); \
 } while(0)
 
-#if 0
-static void dump_buffer(irc_connection *con)
-{
-	printf("{");
-	for (int i=0; i < IRC_BUFFER_SIZE; i++) {
-		if (i == con->rpos) printf("[");
-		if (i == con->wpos) printf("]");
-
-		if (con->buf[i] == '\n' || con->buf[i] == '\r') 
-			printf("^");
-		else if (con->buf[i] == 0)
-			printf("_");
-		else
-			printf("%c", con->buf[i]);
-	}
-	printf("}\n");
-}
-#endif
-
 int irc_connect(irc_connection *con, char *hostname, int port)
 {
 	struct sockaddr_in serv_addr;
@@ -94,10 +75,7 @@ void irc_close(irc_connection *con, char *qmsg)
 int irc_set_nick(irc_connection *con, const char *nick)
 {
 	con->nick = strdup(nick);
-	strcpy(con->nick, nick);
-
 	Irc_send(con, "NICK %s\n", con->nick);
-
 	return 0;
 }
 
@@ -105,10 +83,10 @@ int irc_set_user(irc_connection *con,
 		const char *username, const char *hostname,
 		const char *servername, const char* realname)
 {
-	con->username = strdup(username);
-	con->hostname = strdup(hostname);
+	con->username   = strdup(username);
+	con->hostname   = strdup(hostname);
 	con->servername = strdup(servername);
-	con->realname = strdup(realname);
+	con->realname   = strdup(realname);
 
 	if (!con->username || !con->hostname || !con->servername || !con->realname) {
 		Free_list(con->username, con->hostname, con->servername, con->realname);
@@ -169,6 +147,16 @@ char* irc_next_message(irc_connection *con)
 	con->rpos = p2 + 1 - con->buf;
 
 	return msg;
+}
+
+int irc_send_raw_msg(irc_connection *con, char *msg)
+{
+	assert(con);
+	assert(msg);
+
+	if (msg[strlen(msg)-1] != '\n') return 0;
+
+	return send_string(con, msg);
 }
 
 int wait_fill_buffer(irc_connection *con)

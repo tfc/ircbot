@@ -23,6 +23,7 @@ int irc_set_user(irc_connection *con,
 int irc_messages_pending(irc_connection *con);
 char* irc_next_message(irc_connection *con);
 int wait_fill_buffer(irc_connection *con);
+int irc_send_raw_msg(irc_connection *con, char *msg);
 
 /* Low level */
 int recv_string(irc_connection *con, char *buf, int maxlen);

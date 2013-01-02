@@ -7,6 +7,17 @@
 
 #include "irc.h"
 
+int keyboard_input(irc_connection *con)
+{
+	char msg[512];
+	char *ret = fgets(msg, 511, stdin);
+	if (!ret) return -1;
+
+	if (!strcmp(msg, "q\n")) return -2;
+
+	return irc_send_raw_msg(con, msg);
+}
+
 int main(int argc, char *argv[])
 {
 	int err;
@@ -30,7 +41,7 @@ int main(int argc, char *argv[])
 			printf("<-- %s\n", msg);
 			free(msg);
 		}
-	} while (err);
+	} while (keyboard_input(&con) != -2 && err);
 
 	irc_close(&con, "bye.");
 }
