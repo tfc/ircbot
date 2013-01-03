@@ -7,6 +7,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h> 
+#include <glib.h>
 
 #include "helpers.h"
 #include "irc.h"
@@ -20,6 +21,15 @@
 	send_string(con, sendmsg); \
 	free(sendmsg); \
 } while(0)
+
+#define Copy_match(__info, __num, __dest) do { \
+	gchar *word = g_match_info_fetch(__info, __num); \
+	__dest = strdup(word); \
+	g_free(word); \
+} while (0)
+
+static int irc_connections = 0;
+static GRegex *irc_msg_regex_pattern = NULL;
 
 int irc_connect(irc_connection *con, char *hostname, int port)
 {
@@ -58,6 +68,16 @@ int irc_connect(irc_connection *con, char *hostname, int port)
 	con->buf[IRC_BUFFER_SIZE] = '\0';
 	con->wpos = con->rpos = 0;
 
+	if (!irc_msg_regex_pattern)
+		/* Found this pattern at 
+		 * http://calebdelnay.com/blog/2010/11/parsing-the-irc-message-format-as-a-client
+		 */
+		irc_msg_regex_pattern = g_regex_new(
+				"(?::(\\S+) )?(\\S+)(?: (?!:)(.+?))?(?: :(.+))?$", 0, 0, NULL);
+	assert(irc_msg_regex_pattern);
+
+	irc_connections++;
+
 	return 0;
 }
 
@@ -70,6 +90,9 @@ void irc_close(irc_connection *con, char *qmsg)
 
 	Free_list(con->buf, con->nick, con->username, con->hostname, con->servername, con->realname);
 	close(con->sockfd);
+
+	if (!--irc_connections) g_regex_unref(irc_msg_regex_pattern);
+	assert(irc_connections >= 0);
 }
 
 int irc_set_nick(irc_connection *con, const char *nick)
@@ -128,7 +151,7 @@ int irc_messages_pending(irc_connection *con)
 
 }
 
-char* irc_next_message(irc_connection *con)
+char* irc_next_message_rawstr(irc_connection *con)
 {
 	char *p = con->buf + con->rpos;
 	char *p2 = strchr(p, '\n');
@@ -147,6 +170,39 @@ char* irc_next_message(irc_connection *con)
 	con->rpos = p2 + 1 - con->buf;
 
 	return msg;
+}
+
+
+irc_msg* irc_next_message(irc_connection *con)
+{
+	gboolean ret;
+	GMatchInfo *info;
+	irc_msg *ircmsg = NULL;
+	char *raw_msg = irc_next_message_rawstr(con);
+
+	if (!raw_msg) goto ircmsg_out;
+
+	ret = g_regex_match(irc_msg_regex_pattern, raw_msg, 0, &info);
+
+	int matches = g_match_info_get_match_count(info);
+	if (matches != 5) goto ircmsg_out;
+
+	ircmsg = malloc(sizeof(irc_msg));
+	if (!ircmsg) goto ircmsg_out;
+
+	Copy_match(info, 1, ircmsg->source);
+	Copy_match(info, 2, ircmsg->command);
+	Copy_match(info, 3, ircmsg->target);
+	Copy_match(info, 4, ircmsg->params);
+
+ircmsg_out:
+	g_match_info_free(info);
+	return ircmsg;
+}
+
+void irc_free_msg(irc_msg *msg)
+{
+	Free_list(msg->source, msg->command, msg->target, msg->params, msg);
 }
 
 int irc_send_raw_msg(irc_connection *con, char *msg)

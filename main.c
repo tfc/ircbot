@@ -37,9 +37,14 @@ int main(int argc, char *argv[])
 		int msgs = irc_messages_pending(&con);
 
 		while (msgs--) {
-			char *msg = irc_next_message(&con);
-			printf("<-- %s\n", msg);
-			free(msg);
+			irc_msg *msg = irc_next_message(&con);
+			if (!msg) { 
+				printf("Erroneous message.\n"); 
+				continue; 
+			}
+			printf("<-- %s {SRC [%s] CMD [%s] TGT [%s]}\n",
+				msg->params, msg->source, msg->command, msg->target);
+			irc_free_msg(msg);
 		}
 	} while (keyboard_input(&con) != -2 && err);
 

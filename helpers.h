@@ -1,10 +1,12 @@
 
+#ifndef MIN
 #define MIN(a,b) \
 ({ \
 	__typeof__ (a) _a = (a); \
 	__typeof__ (b) _b = (b); \
 	_a < _b ? _a : _b; \
 })
+#endif
 
 #define FN_APPLY(type, fn, ...) { \
 	void *__stopper = (int[]){0}; \
