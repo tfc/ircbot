@@ -4,10 +4,12 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 
 #include "irc.h"
+#include "helpers.h"
 
-int keyboard_input(irc_connection *con)
+static int handle_keyboard_input(irc_connection *con)
 {
 	char msg[512];
 	char *ret = fgets(msg, 511, stdin);
@@ -18,9 +20,34 @@ int keyboard_input(irc_connection *con)
 	return irc_send_raw_msg(con, msg);
 }
 
+
+static int handle_irc_messages(irc_connection *con)
+{
+	wait_fill_buffer(con);
+	int msgs = irc_messages_pending(con);
+
+	while (msgs--) {
+		irc_msg *msg = irc_next_message(con);
+		if (!msg) { 
+			printf("Erroneous message.\n"); 
+			continue; 
+		}
+		printf("<-- %s {SRC [%s] CMD [%s] TGT [%s]}\n",
+				msg->params, msg->source, msg->command, msg->target);
+		irc_free_msg(msg);
+	}
+
+	return 0;
+}
+
 int main(int argc, char *argv[])
 {
 	int err;
+	int max_descr;
+	fd_set sock_set;
+	struct timeval select_timeout;
+	int running = 1;
+
 	irc_connection con;
 
 	err = irc_connect(&con, argv[1], atoi(argv[2]));
@@ -32,21 +59,30 @@ int main(int argc, char *argv[])
 	irc_set_nick(&con, "cbot");
 	irc_set_user(&con, "cbot_user", "cbot_host", "cbot_servername", "CBot Real Name");
 
-	do {
-		err = wait_fill_buffer(&con);
-		int msgs = irc_messages_pending(&con);
+	max_descr = MAX(STDIN_FILENO, con.sockfd) + 1;
 
-		while (msgs--) {
-			irc_msg *msg = irc_next_message(&con);
-			if (!msg) { 
-				printf("Erroneous message.\n"); 
-				continue; 
-			}
-			printf("<-- %s {SRC [%s] CMD [%s] TGT [%s]}\n",
-				msg->params, msg->source, msg->command, msg->target);
-			irc_free_msg(msg);
+	while (running) {
+		FD_ZERO(&sock_set);
+		FD_SET(STDIN_FILENO, &sock_set);
+		FD_SET(con.sockfd, &sock_set);
+
+		select_timeout.tv_sec = 120;
+		select_timeout.tv_usec = 0;
+
+		err = select(max_descr, &sock_set, NULL, NULL, &select_timeout);
+
+		if (!err) {
+			/* Handle timeout */
 		}
-	} while (keyboard_input(&con) != -2 && err);
+
+		if (FD_ISSET(con.sockfd, &sock_set))
+			/* Incoming data from IRC network */			
+			running = !handle_irc_messages(&con);
+
+		if (FD_ISSET(STDIN_FILENO, &sock_set))
+			/* Local user input */
+			running = handle_keyboard_input(&con) != -2;
+	}
 
 	irc_close(&con, "bye.");
 }
