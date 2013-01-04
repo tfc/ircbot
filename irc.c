@@ -185,15 +185,17 @@ irc_msg* irc_next_message(irc_connection *con)
 	ret = g_regex_match(irc_msg_regex_pattern, raw_msg, 0, &info);
 
 	int matches = g_match_info_get_match_count(info);
-	if (matches != 5) goto ircmsg_out;
+	if (matches != 5 && matches != 4) goto ircmsg_out;
 
 	ircmsg = malloc(sizeof(irc_msg));
 	if (!ircmsg) goto ircmsg_out;
 
+	ircmsg->raw_str = strdup(raw_msg);
 	Copy_match(info, 1, ircmsg->source);
 	Copy_match(info, 2, ircmsg->command);
 	Copy_match(info, 3, ircmsg->target);
-	Copy_match(info, 4, ircmsg->params);
+	if (matches == 5) Copy_match(info, 4, ircmsg->params);
+	else 		  ircmsg->params = NULL;
 
 ircmsg_out:
 	g_match_info_free(info);
@@ -202,7 +204,7 @@ ircmsg_out:
 
 void irc_free_msg(irc_msg *msg)
 {
-	Free_list(msg->source, msg->command, msg->target, msg->params, msg);
+	Free_list(msg->raw_str, msg->source, msg->command, msg->target, msg->params, msg);
 }
 
 int irc_send_raw_msg(irc_connection *con, char *msg)

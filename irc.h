@@ -31,9 +31,11 @@ typedef struct irc_connection {
  * last server message
  */
 typedef struct irc_msg {
+	char *raw_str;
+	int command_num;
+
 	char *source;
 	char *command;
-	int command_num;
 	char *target;
 	char *params;
 } irc_msg;

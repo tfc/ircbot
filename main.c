@@ -32,8 +32,7 @@ static int handle_irc_messages(irc_connection *con)
 			printf("Erroneous message.\n"); 
 			continue; 
 		}
-		printf("<-- %s {SRC [%s] CMD [%s] TGT [%s]}\n",
-				msg->params, msg->source, msg->command, msg->target);
+		printf("<-- %s\n", msg->raw_str);
 		irc_free_msg(msg);
 	}
 
