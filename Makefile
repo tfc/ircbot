@@ -5,6 +5,7 @@ LIBS:=`pkg-config --libs glib-2.0`
 TESTSERVER=localhost
 
 all: $(EXECUTABLE)
+	$(MAKE) -C plugins
 
 $(EXECUTABLE): $(OBJECTS)
 	$(LINK.o) $^ -o $@ $(LIBS)

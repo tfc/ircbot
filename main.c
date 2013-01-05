@@ -10,19 +10,6 @@
 #include "irc.h"
 #include "plugin.h"
 
-int test_plugin(irc_connection *con, irc_msg *msg)
-{
-	if (strcmp(msg->command, "PING")) return 0;
-	char *answer;
-	asprintf(&answer, "%s\n", msg->raw_str);
-	answer[1] = 'O';
-
-	printf("Got a PING signal (%s).\n", msg->raw_str);
-	irc_send_raw_msg(con, answer);
-
-	free(answer);
-	return 1;
-}
 
 static int handle_keyboard_input(irc_connection *con)
 {
@@ -74,7 +61,7 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	plugin_add(&con, test_plugin);
+	plugin_load_plugin_dir(&con);
 
 	irc_set_nick(&con, "cbot");
 	irc_set_user(&con, "cbot_user", "cbot_host", "cbot_servername", "CBot Real Name");

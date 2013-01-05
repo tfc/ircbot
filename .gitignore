@@ -1,3 +1,5 @@
 bot
 tags
 *.o
+*.dylib
+*.so

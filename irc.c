@@ -70,12 +70,17 @@ int irc_connect(irc_connection *con, char *hostname, int port)
 
 	if (!irc_msg_regex_pattern)
 		irc_msg_regex_pattern = g_regex_new(
+#if 0
 			/* Found this pattern at 
 			 * http://calebdelnay.com/blog/2010/11/parsing-the-irc-message-format-as-a-client
 			 */
-			//"(?::(\\S+) )?(\\S+)(?: (?!:)(.+?))?(?: :(.+))?$", 0, 0, NULL);
+			"(?::(\\S+) )?(\\S+)(?: (?!:)(.+?))?(?: :(.+))?$",
+#else
 			/* And this one somewhere else. Will add the URL when i have found it... */
-			"^(?:[:@]([^\\s]+) )?([^\\s]+)(?: ((?:[^:\\s][^\\s]* ?)*))?(?: ?:(.*))?$", 0, 0, NULL);
+			"^(?:[:@]([^\\s]+) )?([^\\s]+)(?: ((?:[^:\\s][^\\s]* ?)*))?(?: ?:(.*))?$",
+#endif
+			0, 0, NULL);
+
 	assert(irc_msg_regex_pattern);
 
 	irc_connections++;
