@@ -34,7 +34,7 @@ int module_handle_msg(irc_connection *con, irc_msg *msg)
 
 static int module_add(irc_connection *con, const char *module_file)
 {
-	void* module_libfile = dlopen(module_file, RTLD_LAZY);
+	void* module_libfile = dlopen(module_file, RTLD_NOW | RTLD_LOCAL);
 	if (!module_libfile) return -1;
 
 	module_irc_message_handler module_msg_handler = dlsym(module_libfile, "module_message_handler");
@@ -43,7 +43,7 @@ static int module_add(irc_connection *con, const char *module_file)
 	init_module_func mod_init = dlsym(module_libfile, "init_module");
 	if (!mod_init) return -3;
 
-	mod_init();
+	mod_init(send_string);
 
 	module_listitem *p = malloc(sizeof(module_listitem));
 	if (!p) return -3;

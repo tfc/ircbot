@@ -14,12 +14,8 @@ static send_string_func _ssf = NULL;
 	free(sendmsg); \
 } while(0)
 
-void init_module()
+void init_module(send_string_func ssf)
 {
-	void* self_process = dlopen(NULL, 0);
-	assert(self_process);
-
-	_ssf = dlsym(self_process, "send_string");
-	assert(_ssf);
+    _ssf = ssf;
 }
 

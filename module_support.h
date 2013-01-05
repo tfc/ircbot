@@ -9,7 +9,7 @@ int module_handle_msg(irc_connection *con, irc_msg *msg);
 
 int module_load_module_dir(irc_connection *con);
 
-typedef void (*init_module_func)(void);
+typedef void (*init_module_func)();
 
 #endif /* __MODULE_SUPPORT_H__ */
 

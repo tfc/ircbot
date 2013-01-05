@@ -21,5 +21,5 @@ clean:
 	rm -f $(EXECUTABLE) $(OBJECTS)
 	make -C modules clean
 
-run: $(EXECUTABLE)
+run: all
 	./$(EXECUTABLE) $(TESTSERVER) 6667
