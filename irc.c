@@ -191,7 +191,7 @@ irc_msg* irc_next_message(irc_connection *con)
 	if (!raw_msg) goto ircmsg_out;
 
 	ret = g_regex_match(irc_msg_regex_pattern, raw_msg, 0, &info);
-    if (!ret) goto ircmsg_out;
+	if (!ret) goto ircmsg_out;
 
 	int matches = g_match_info_get_match_count(info);
 	if (matches != 5 && matches != 4) goto ircmsg_out;

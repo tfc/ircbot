@@ -1,3 +1,5 @@
+CFLAGS:=-g -Wall -Werror `pkg-config --cflags glib-2.0`
+LIBS:=`pkg-config --libs glib-2.0`
 
 PLATFORM:=$(shell uname)
 ifeq ($(PLATFORM), Darwin)

@@ -5,9 +5,10 @@
 
 int module_message_handler(irc_connection *con, irc_msg *msg)
 {
+	return 0;
 	if (strcmp(msg->command, "PRIVMSG")) return 0;
 
-	Irc_send(con, "PRIVMSG %s :%s\n", msg->target, "blam.");
+//	Irc_send(con, "PRIVMSG %s :%s\n", msg->target, "blam.");
 
 	printf("[%s] %s: %s\n", msg->target, msg->source, msg->params);
 

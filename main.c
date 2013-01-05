@@ -33,7 +33,7 @@ static int handle_irc_messages(irc_connection *con)
 			continue; 
 		}
 		if (!module_handle_msg(con, msg))
-#if 1
+#if 0
 			printf("<-- %s\n", msg->raw_str);
 #else
 			printf("<-- SRC %s CMD %s TGT %s PRM %s\n", 
