@@ -144,15 +144,16 @@ static int ringbuf_free(irc_connection *con)
 int irc_messages_pending(irc_connection *con)
 {
 	int msgs = 0;
+    unsigned i;
 
 	if (con->rpos <= con->wpos) {
-		for (unsigned i = con->rpos; i < con->wpos; i++)
+		for (i = con->rpos; i < con->wpos; i++)
 			if (con->buf[i] == '\n') msgs++;
 	}
 	else {
-		for (unsigned i = con->rpos; i < IRC_BUFFER_SIZE; i++)
+		for (i = con->rpos; i < IRC_BUFFER_SIZE; i++)
 			if (con->buf[i] == '\n') msgs++;
-		for (unsigned i = 0; i < con->wpos; i++)
+		for (i = 0; i < con->wpos; i++)
 			if (con->buf[i] == '\n') msgs++;
 	}
 
@@ -190,6 +191,7 @@ irc_msg* irc_next_message(irc_connection *con)
 	if (!raw_msg) goto ircmsg_out;
 
 	ret = g_regex_match(irc_msg_regex_pattern, raw_msg, 0, &info);
+    if (!ret) goto ircmsg_out;
 
 	int matches = g_match_info_get_match_count(info);
 	if (matches != 5 && matches != 4) goto ircmsg_out;

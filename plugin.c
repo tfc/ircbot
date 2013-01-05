@@ -8,6 +8,12 @@
 #include "irc.h"
 #include "plugin.h"
 
+#ifdef __APPLE__
+#define PLUGIN_SUFFIX ".dylib"
+#else
+#define PLUGIN_SUFFIX ".so"
+#endif
+
 typedef struct plugin_listitem {
 	struct plugin_listitem *next;
 	plugin_irc_message_handler handle_msg;
@@ -69,7 +75,7 @@ int plugin_load_plugin_dir(irc_connection *con)
 		char *filename = entry->d_name;
 		if (filename[0] == '.') continue;
 
-		char *dstr = strstr(filename, ".dylib");
+		char *dstr = strstr(filename, PLUGIN_SUFFIX);
 		if (!dstr) continue;
 
 		char *plug_path;

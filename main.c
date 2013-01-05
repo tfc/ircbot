@@ -92,4 +92,5 @@ int main(int argc, char *argv[])
 	}
 
 	irc_close(&con, "bye.");
+    return 0;
 }
