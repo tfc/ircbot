@@ -7,6 +7,7 @@
 #include "helpers.h"
 #include "irc.h"
 #include "module_support.h"
+#include "modules/module.h"
 
 #ifdef __APPLE__
 #define MODULE_SUFFIX ".dylib"
@@ -14,9 +15,18 @@
 #define MODULE_SUFFIX ".so"
 #endif
 
+#define LINK_FUNC(__funcsym, __funcname, __failret) do { \
+	__funcsym = dlsym(module_libfile, __funcname); \
+	if (!__funcsym) return __failret; \
+} while (0)
+
+
 typedef struct module_listitem {
 	struct module_listitem *next;
-	module_irc_message_handler handle_msg;
+
+	module_init init;
+	module_message_handler handle_msg;
+	module_close close;
 } module_listitem;
 
 int module_handle_msg(irc_connection *con, irc_msg *msg)
@@ -34,22 +44,33 @@ int module_handle_msg(irc_connection *con, irc_msg *msg)
 
 static int module_add(irc_connection *con, const char *module_file)
 {
+	init_module_func mod_generic_init;
+	module_message_handler mod_msg_handler;
+	module_init mod_init;
+	module_close mod_close;
+
 	void* module_libfile = dlopen(module_file, RTLD_NOW | RTLD_LOCAL);
 	if (!module_libfile) return -1;
 
 	module_irc_message_handler module_msg_handler = dlsym(module_libfile, "module_message_handler");
 	if (!module_msg_handler) return -2;
 
-	init_module_func mod_init = dlsym(module_libfile, "init_module");
-	if (!mod_init) return -3;
+	LINK_FUNC(mod_generic_init, "init_module_generic", -3);
+	mod_generic_init(send_string);
+	LINK_FUNC(mod_init, "module_init", -4);
+	LINK_FUNC(mod_msg_handler, "module_message_handler", -5);
+	LINK_FUNC(mod_close, "module_close", -6);
 
-	mod_init(send_string);
+	if (mod_init(con)) return -7;
 
 	module_listitem *p = malloc(sizeof(module_listitem));
-	if (!p) return -3;
+	if (!p) return -10;
 
 	p->next = NULL;
+	p->init = mod_init;
 	p->handle_msg = module_msg_handler;
+	p->close = mod_close;
+
 
 	module_listitem *l = con->modules;
 	if (l) {
@@ -81,7 +102,7 @@ int module_load_module_dir(irc_connection *con)
 		char *plug_path;
 		asprintf(&plug_path, "./modules/%s", filename);
 
-		printf("Loading module \"%s\"...\t", filename);
+		printf("Loading module %20s ...\t", filename);
 		ret = module_add(con, plug_path);
 		if (!ret) {
 			modules_loaded++;

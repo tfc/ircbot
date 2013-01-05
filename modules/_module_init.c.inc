@@ -14,7 +14,7 @@ static send_string_func _ssf = NULL;
 	free(sendmsg); \
 } while(0)
 
-void init_module(send_string_func ssf)
+void init_module_generic(send_string_func ssf)
 {
     _ssf = ssf;
 }

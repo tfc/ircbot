@@ -13,3 +13,14 @@ int module_message_handler(irc_connection *con, irc_msg *msg)
 
 	return 1;
 }
+
+int module_init(irc_connection *con)
+{
+	return 0;
+}
+
+void module_close(void) 
+{
+
+}
+

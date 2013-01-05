@@ -6,16 +6,7 @@
 
 int module_message_handler(irc_connection *con, irc_msg *msg)
 {
-	if (strcmp(msg->command, "PING")) return 0;
-
-	char *answer = strdup(msg->raw_str);
-	answer[1] = 'O';
-	Irc_send(con, "%s\n", answer);
-	free(answer);
-
-	printf("Got a PING signal (%s).\n", msg->raw_str);
-
-	return 1;
+	return 0;
 }
 
 int module_init(irc_connection *con)
@@ -25,6 +16,4 @@ int module_init(irc_connection *con)
 
 void module_close(void) 
 {
-
 }
-
