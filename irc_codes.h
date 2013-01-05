@@ -1,3 +1,5 @@
+#ifndef __IRC_CODES_H__
+#define __IRC_CODES_H__
 
 /*
  * This file contains all IRC message codes from the RFC 1459 standard.
@@ -1032,4 +1034,7 @@
 /* ERR_NOSERVICEHOST
  */
 #define ERR_NOSERVICEHOST 492
+
+
+#endif /* __IRC_CODES_H__ */
 

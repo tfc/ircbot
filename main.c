@@ -6,20 +6,33 @@
 #include <sys/socket.h>
 #include <sys/time.h>
 
-#include "irc.h"
 #include "helpers.h"
+#include "irc.h"
+#include "plugin.h"
+
+int test_plugin(irc_connection *con, irc_msg *msg)
+{
+	if (strcmp(msg->command, "PING")) return 0;
+	char *answer;
+	asprintf(&answer, "%s\n", msg->raw_str);
+	answer[1] = 'O';
+
+	printf("Got a PING signal (%s).\n", msg->raw_str);
+	irc_send_raw_msg(con, answer);
+
+	free(answer);
+	return 1;
+}
 
 static int handle_keyboard_input(irc_connection *con)
 {
 	char msg[512];
 	char *ret = fgets(msg, 511, stdin);
 	if (!ret) return -1;
-
 	if (!strcmp(msg, "q\n")) return -2;
 
 	return irc_send_raw_msg(con, msg);
 }
-
 
 static int handle_irc_messages(irc_connection *con)
 {
@@ -32,7 +45,13 @@ static int handle_irc_messages(irc_connection *con)
 			printf("Erroneous message.\n"); 
 			continue; 
 		}
-		printf("<-- %s\n", msg->raw_str);
+		if (!plugins_handle_msg(con, msg))
+#if 0
+			printf("<-- %s\n", msg->raw_str);
+#else
+			printf("<-- SRC %s CMD %s TGT %s PRM %s\n", 
+					msg->source, msg->command, msg->target, msg->params);
+#endif
 		irc_free_msg(msg);
 	}
 
@@ -54,6 +73,8 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "Got no connection.");
 		exit(1);
 	}
+
+	plugin_add(&con, test_plugin);
 
 	irc_set_nick(&con, "cbot");
 	irc_set_user(&con, "cbot_user", "cbot_host", "cbot_servername", "CBot Real Name");

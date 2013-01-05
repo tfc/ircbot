@@ -1,3 +1,5 @@
+#ifndef __HELPERS_H__
+#define __HELPERS_H__
 
 #ifndef MIN
 #define MIN(a,b) \
@@ -32,3 +34,6 @@
 	asprintf(&(write_to), __VA_ARGS); \
 	free(__tmp_str); \
 }
+
+#endif /* __HELPERS_H__ */
+

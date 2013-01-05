@@ -1,3 +1,5 @@
+#ifndef __IRC_H__
+#define __IRC_H__
 
 /*
  * This struct is an IRC connection handle.
@@ -21,6 +23,8 @@ typedef struct irc_connection {
 	char *hostname;
 	char *servername;
 	char *realname;
+
+	void *plugins;
 } irc_connection;
 
 /*
@@ -79,4 +83,7 @@ void irc_free_msg(irc_msg *msg);
 /* Low level */
 int recv_string(irc_connection *con, char *buf, int maxlen);
 int send_string(irc_connection *con, char *buf);
+
+
+#endif /* __IRC_H__ */
 
