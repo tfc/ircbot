@@ -52,8 +52,12 @@ int main(int argc, char *argv[])
 	fd_set sock_set;
 	struct timeval select_timeout;
 	int running = 1;
-
 	irc_connection con;
+
+	if (argc != 3) {
+		printf("Usage: %s <IRC server> <port>\n", argv[0]);
+		return 1;
+	}
 
 	err = irc_connect(&con, argv[1], atoi(argv[2]));
 	if (err) {
