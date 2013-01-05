@@ -1,5 +1,5 @@
 EXECUTABLE=bot
-OBJECTS=main.o irc.o plugin.o
+OBJECTS=main.o irc.o module_support.o
 CFLAGS:=-g -Wall -Werror `pkg-config --cflags glib-2.0`
 LIBS:=`pkg-config --libs glib-2.0`
 TESTSERVER=localhost
@@ -12,14 +12,14 @@ else
 endif
 
 all: $(EXECUTABLE)
-	$(MAKE) -C plugins
+	$(MAKE) -C modules
 
 $(EXECUTABLE): $(OBJECTS)
 	$(LINK.o) $^ -o $@ $(LIBS)
 
 clean:
 	rm -f $(EXECUTABLE) $(OBJECTS)
-	make -C plugins clean
+	make -C modules clean
 
 run: $(EXECUTABLE)
 	./$(EXECUTABLE) $(TESTSERVER) 6667

@@ -8,7 +8,7 @@
 
 #include "helpers.h"
 #include "irc.h"
-#include "plugin.h"
+#include "module_support.h"
 
 
 static int handle_keyboard_input(irc_connection *con)
@@ -32,8 +32,8 @@ static int handle_irc_messages(irc_connection *con)
 			printf("Erroneous message.\n"); 
 			continue; 
 		}
-		if (!plugins_handle_msg(con, msg))
-#if 0
+		if (!module_handle_msg(con, msg))
+#if 1
 			printf("<-- %s\n", msg->raw_str);
 #else
 			printf("<-- SRC %s CMD %s TGT %s PRM %s\n", 
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	plugin_load_plugin_dir(&con);
+	module_load_module_dir(&con);
 
 	irc_set_nick(&con, "cbot");
 	irc_set_user(&con, "cbot_user", "cbot_host", "cbot_servername", "CBot Real Name");

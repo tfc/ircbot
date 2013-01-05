@@ -85,7 +85,7 @@ int irc_connect(irc_connection *con, char *hostname, int port)
 
 	irc_connections++;
 
-	con->plugins = NULL;
+	con->modules = NULL;
 
 	return 0;
 }
