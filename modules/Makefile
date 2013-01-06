@@ -10,7 +10,7 @@ MODULE_SUFFIX:=.dylib
 
 else
 MODULE_SUFFIX:=.so
-FLAGS:=$(CFLAGS) -fPIC -D_GNU_SOURCE
+CFLAGS:=$(CFLAGS) -fPIC -D_GNU_SOURCE
 LIBS:=$(LIBS) -ldl
 
 %.so: %.o
@@ -20,9 +20,9 @@ endif
 
 SRCS=$(wildcard *.c)
 OBJECTS=$(SRCS:.c=.o)
-LIBS=$(SRCS:.c=$(MODULE_SUFFIX))
+MODULES=$(SRCS:.c=$(MODULE_SUFFIX))
 
-default: $(LIBS)
+default: $(MODULES)
 
 clean:
 	rm -f *$(MODULE_SUFFIX) *.o
