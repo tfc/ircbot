@@ -10,7 +10,8 @@ MODULE_SUFFIX:=.dylib
 
 else
 MODULE_SUFFIX:=.so
-	CFLAGS:=-fPIC
+FLAGS:=$(CFLAGS) -fPIC -D_GNU_SOURCE
+LIBS:=$(LIBS) -ldl
 
 %.so: %.o
 	gcc -shared $< -o $@
