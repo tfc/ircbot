@@ -42,6 +42,10 @@ typedef struct irc_msg {
 	char *command;
 	char *target;
 	char *params;
+
+	char *src_nick;
+	char *src_user;
+	char *src_host;
 } irc_msg;
 
 #endif /* __IRC_MSG_STRUCT_H__ */

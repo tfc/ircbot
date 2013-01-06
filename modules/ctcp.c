@@ -19,7 +19,7 @@ static int ctcp_ping(irc_connection *con, irc_msg *msg)
 	if (matches != 2) return 0;
 
 	gchar *ping_id_str = g_match_info_fetch(info, 1);
-	Irc_send(con, "NOTICE %s :\001PING %s\001\n", msg->source, ping_id_str);
+	Irc_send(con, "NOTICE %s :\001PING %s\001\n", msg->src_nick, ping_id_str);
 	g_free(ping_id_str);
 
 	return 1;
@@ -36,7 +36,7 @@ static int ctcp_version(irc_connection *con, irc_msg *msg)
 	if (matches != 1) return 0;
 
 	Irc_send(con, "NOTICE %s :\001VERSION %s\001\n", 
-			msg->source, "plain C irc bot: https://github.com/tfc/ircbot");
+			msg->src_nick, "plain C irc bot: https://github.com/tfc/ircbot");
 
 	return 1;
 }

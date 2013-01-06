@@ -30,6 +30,7 @@
 
 static int irc_connections = 0;
 static GRegex *irc_msg_regex_pattern = NULL;
+static GRegex *irc_msgsrc_regex_pattern = NULL;
 
 int irc_connect(irc_connection *con, char *hostname, int port)
 {
@@ -76,12 +77,16 @@ int irc_connect(irc_connection *con, char *hostname, int port)
 			 */
 			"(?::(\\S+) )?(\\S+)(?: (?!:)(.+?))?(?: :(.+))?$",
 #else
-			/* And this one somewhere else. Will add the URL when i have found it... */
+			/* And this one somewhere else (some thread on stackoverflow.com). 
+			 * Will add the URL when i have found it... */
 			"^(?:[:@]([^\\s]+) )?([^\\s]+)(?: ((?:[^:\\s][^\\s]* ?)*))?(?: ?:(.*))?$",
 #endif
 			0, 0, NULL);
+	if (!irc_msgsrc_regex_pattern)
+		irc_msgsrc_regex_pattern = g_regex_new("^(.+?)!(.+?)@(.+?)$", 0, 0, NULL);
 
 	assert(irc_msg_regex_pattern);
+	assert(irc_msgsrc_regex_pattern);
 
 	irc_connections++;
 
@@ -100,7 +105,11 @@ void irc_close(irc_connection *con, char *qmsg)
 	Free_list(con->buf, con->nick, con->username, con->hostname, con->servername, con->realname);
 	close(con->sockfd);
 
-	if (!--irc_connections) g_regex_unref(irc_msg_regex_pattern);
+	if (!--irc_connections) {
+		g_regex_unref(irc_msg_regex_pattern);
+		g_regex_unref(irc_msgsrc_regex_pattern);
+	}
+
 	assert(irc_connections >= 0);
 }
 
@@ -184,36 +193,55 @@ char* irc_next_message_rawstr(irc_connection *con)
 irc_msg* irc_next_message(irc_connection *con)
 {
 	gboolean ret;
-	GMatchInfo *info;
+	GMatchInfo *msg_info;
+	GMatchInfo *user_info;
 	irc_msg *ircmsg = NULL;
 	char *raw_msg = irc_next_message_rawstr(con);
 
 	if (!raw_msg) goto ircmsg_out;
 
-	ret = g_regex_match(irc_msg_regex_pattern, raw_msg, 0, &info);
+	ret = g_regex_match(irc_msg_regex_pattern, raw_msg, 0, &msg_info);
 	if (!ret) goto ircmsg_out;
 
-	int matches = g_match_info_get_match_count(info);
+	int matches = g_match_info_get_match_count(msg_info);
 	if (matches != 5 && matches != 4) goto ircmsg_out;
 
 	ircmsg = malloc(sizeof(irc_msg));
 	if (!ircmsg) goto ircmsg_out;
 
 	ircmsg->raw_str = strdup(raw_msg);
-	Copy_match(info, 1, ircmsg->source);
-	Copy_match(info, 2, ircmsg->command);
-	Copy_match(info, 3, ircmsg->target);
-	if (matches == 5) Copy_match(info, 4, ircmsg->params);
+	Copy_match(msg_info, 1, ircmsg->source);
+	Copy_match(msg_info, 2, ircmsg->command);
+	Copy_match(msg_info, 3, ircmsg->target);
+	if (matches == 5) Copy_match(msg_info, 4, ircmsg->params);
 	else 		  ircmsg->params = NULL;
 
+	ret = g_regex_match(irc_msgsrc_regex_pattern, ircmsg->source, 0, &user_info);
+	if (!ret) goto ircmsg_userinfo_out;
+
+	matches = g_match_info_get_match_count(user_info);
+	if (matches != 4) goto ircmsg_userinfo_out;
+
+	Copy_match(user_info, 1, ircmsg->src_nick);
+	Copy_match(user_info, 2, ircmsg->src_user);
+	Copy_match(user_info, 3, ircmsg->src_host);
+
+	goto ircmsg_out;
+
+ircmsg_userinfo_out:
+	ircmsg->src_nick = ircmsg->src_user = ircmsg->src_host = NULL;
 ircmsg_out:
-	g_match_info_free(info);
+	g_match_info_free(msg_info);
+	g_match_info_free(user_info);
 	return ircmsg;
 }
 
 void irc_free_msg(irc_msg *msg)
 {
-	Free_list(msg->raw_str, msg->source, msg->command, msg->target, msg->params, msg);
+	Free_list(msg->raw_str, 
+		msg->source, msg->command, msg->target, msg->params, 
+		msg->src_nick, msg->src_user, msg->src_host,
+		msg);
 }
 
 int irc_send_raw_msg(irc_connection *con, char *msg)
