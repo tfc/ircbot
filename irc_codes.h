@@ -4,7 +4,8 @@
 /*
  * This file contains all IRC message codes from the RFC 1459 standard.
  *
- * It was generated from http://www.irchelp.org/irchelp/text/rfc1459.txt
+ * It was generated with some nice regex-AWK-action 
+ * from http://www.irchelp.org/irchelp/text/rfc1459.txt
  *
  */
 

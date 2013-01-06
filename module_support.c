@@ -20,7 +20,17 @@
 	if (!__funcsym) return __failret; \
 } while (0)
 
+/* Every module has actually two initialization procedures.
+ * - One implemented by the module programmer for his private stuff.
+ * - One implemented by us initializing function pointers since
+ *   this is all linked at runtime.
+ * This typedef is for the latter.
+ */
+typedef void (*init_module_func)();
 
+/* We will be just keeping a linked list of loaded modules.
+ * Every item keeps pointers to the modules' functions/procedures
+ */
 typedef struct module_listitem {
 	struct module_listitem *next;
 
@@ -29,6 +39,10 @@ typedef struct module_listitem {
 	module_close close;
 } module_listitem;
 
+/* 
+ * The bot code will call this function on every IRC message
+ * and the modules will dispatch them.
+ */
 int module_handle_msg(irc_connection *con, irc_msg *msg)
 {
 	module_listitem *p = con->modules;
@@ -52,11 +66,11 @@ static int module_add(irc_connection *con, const char *module_file)
 	void* module_libfile = dlopen(module_file, RTLD_NOW | RTLD_LOCAL);
 	if (!module_libfile) return -1;
 
-	module_irc_message_handler module_msg_handler = dlsym(module_libfile, "module_message_handler");
+	module_message_handler module_msg_handler = dlsym(module_libfile, "module_message_handler");
 	if (!module_msg_handler) return -2;
 
 	LINK_FUNC(mod_generic_init, "init_module_generic", -3);
-	mod_generic_init(send_string);
+	mod_generic_init(irc_send_raw_msg);
 	LINK_FUNC(mod_init, "module_init", -4);
 	LINK_FUNC(mod_msg_handler, "module_message_handler", -5);
 	LINK_FUNC(mod_close, "module_close", -6);
@@ -64,13 +78,16 @@ static int module_add(irc_connection *con, const char *module_file)
 	if (mod_init(con)) return -7;
 
 	module_listitem *p = malloc(sizeof(module_listitem));
-	if (!p) return -10;
+	if (!p) return -8;
+
+	/* Ok, everything seems to be fine. So we can finally populate the
+	 * module structure's pointers and add it to the list of 
+	 * loaded modules! */
 
 	p->next = NULL;
 	p->init = mod_init;
 	p->handle_msg = module_msg_handler;
 	p->close = mod_close;
-
 
 	module_listitem *l = con->modules;
 	if (l) {
@@ -91,6 +108,10 @@ int module_load_module_dir(irc_connection *con)
 
 	int modules_loaded = 0;
 	struct dirent *entry;
+
+	/* search through the module directory and
+	 * load everything what looks like a module file.
+	 */
 
 	while ((entry = readdir(module_dir))) {
 		char *filename = entry->d_name;

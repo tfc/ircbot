@@ -1,6 +1,7 @@
 #ifndef __IRC_H__
 #define __IRC_H__
 
+/* See the innards of irc_msg and irc_connections here. */
 #include "irc_common_struct.h"
 
 /* Connect to the IRC and initialize *con.

@@ -43,6 +43,11 @@ typedef struct irc_msg {
 	char *target;
 	char *params;
 
+	/* These strings are actually substrings of
+	 * irc_msg::source if it has a format like
+	 * "nick!user@host".
+	 * They are set to NULL if this is not the case. 
+	 */
 	char *src_nick;
 	char *src_user;
 	char *src_host;

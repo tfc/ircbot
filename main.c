@@ -16,6 +16,8 @@ static int handle_keyboard_input(irc_connection *con)
 	char msg[512];
 	char *ret = fgets(msg, 511, stdin);
 	if (!ret) return -1;
+
+	/* user input "q" quits the whole application. */
 	if (!strcmp(msg, "q\n")) return -2;
 
 	return irc_send_raw_msg(con, msg);
@@ -53,13 +55,21 @@ int main(int argc, char *argv[])
 	struct timeval select_timeout;
 	int running = 1;
 	irc_connection con;
+	unsigned port;
 
-	if (argc != 3) {
+	if (argc == 2) 
+		/* No port provided from command line. 
+		 * Using default port.
+		 */
+		port = 6667;
+	else if (argc != 3) {
 		printf("Usage: %s <IRC server> <port>\n", argv[0]);
 		return 1;
 	}
+	else
+		port = atoi(argv[2]);
 
-	err = irc_connect(&con, argv[1], atoi(argv[2]));
+	err = irc_connect(&con, argv[1], port);
 	if (err) {
 		fprintf(stderr, "Got no connection.");
 		exit(1);
@@ -96,5 +106,5 @@ int main(int argc, char *argv[])
 	}
 
 	irc_close(&con, "bye.");
-    return 0;
+	return 0;
 }

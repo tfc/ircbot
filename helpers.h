@@ -28,8 +28,15 @@
 		fn(__list[i]); \
 }
 
+/* vectorized free() procedure.
+ * Just use it like free(ptr1, ptr2, ptr3); on any kind of pointers.
+ */
 #define Free_list(...) FN_APPLY(void, free, __VA_ARGS__)
 
+/* Safe asprintf function. This is nice an handy for 
+ * multiple manipulations on the same string, since
+ * it doesn't leak memory.
+ */
 #define Sasprintf(write_to, ...) { \
 	char *__tmp_str = write_to; \
 	asprintf(&(write_to), __VA_ARGS); \

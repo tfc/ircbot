@@ -3,6 +3,7 @@
 #include <string.h>
 #include <glib.h>
 
+#include "module.h"
 #include "_module_init.c.inc"
 
 static GRegex *ping_pattern    = NULL;
@@ -49,8 +50,8 @@ int module_message_handler(irc_connection *con, irc_msg *msg)
 
 int module_init(irc_connection *con)
 {
-	ping_pattern = g_regex_new("^[\001]PING (.+)[\001]$", 0, 0, NULL);
-	version_pattern = g_regex_new("^[\001]VERSION[\001]$", 0, 0, NULL);
+	ping_pattern = g_regex_new("^\001PING (.+)\001$", 0, 0, NULL);
+	version_pattern = g_regex_new("^\001VERSION\001$", 0, 0, NULL);
 
 	if (!ping_pattern || !version_pattern) return -1;
 

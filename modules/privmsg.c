@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "module.h"
 #include "_module_init.c.inc"
 
 int module_message_handler(irc_connection *con, irc_msg *msg)
@@ -21,6 +22,5 @@ int module_init(irc_connection *con)
 
 void module_close(void) 
 {
-
 }
 
