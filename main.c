@@ -2,14 +2,17 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <assert.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/time.h>
 
 #include "helpers.h"
 #include "irc.h"
+#include "config.h"
 #include "module_support.h"
 
+#define CONF(__key) (config_get_value(g, (__key)))
 
 static int handle_keyboard_input(irc_connection *con)
 {
@@ -55,21 +58,31 @@ int main(int argc, char *argv[])
 	struct timeval select_timeout;
 	int running = 1;
 	irc_connection con;
-	unsigned port;
+	unsigned irc_port;
+	char *irc_server;
 
-	if (argc == 2) 
-		/* No port provided from command line. 
-		 * Using default port.
-		 */
-		port = 6667;
-	else if (argc != 3) {
-		printf("Usage: %s <IRC server> <port>\n", argv[0]);
-		return 1;
+	config *conf = config_from_filename("ircb.conf");
+	assert(conf);
+
+	if (argc == 3) {
+		irc_server = argv[1];
+		irc_port = atoi(argv[2]);
+	}
+	if (argc == 2) {
+		irc_server = argv[1];
+		irc_port = 6667;
+	}
+	else if (argc == 1) {
+		config_group *g = config_get_group(conf, "irc");
+		irc_server = config_get_value(g, "server");
+		char *portstr = config_get_value(g, "port");
+		assert(irc_server && portstr);
+		irc_port = atoi(portstr);
 	}
 	else
-		port = atoi(argv[2]);
+		return 1;
 
-	err = irc_connect(&con, argv[1], port);
+	err = irc_connect(&con, irc_server, irc_port);
 	if (err) {
 		fprintf(stderr, "Got no connection.");
 		exit(1);
@@ -77,8 +90,10 @@ int main(int argc, char *argv[])
 
 	module_load_module_dir(&con);
 
-	irc_set_nick(&con, "cbot");
-	irc_set_user(&con, "cbot_user", "cbot_host", "cbot_servername", "CBot Real Name");
+	config_group *g = config_get_group(conf, "bot");
+
+	irc_set_nick(&con, CONF("nickname"));
+	irc_set_user(&con, CONF("username"), CONF("hostname"), CONF("servername"), CONF("realname"));
 
 	max_descr = MAX(STDIN_FILENO, con.sockfd) + 1;
 

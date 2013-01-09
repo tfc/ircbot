@@ -94,7 +94,7 @@ int irc_connect(irc_connection *con, char *hostname, int port)
 #else
 			/* And this one somewhere else (some thread on stackoverflow.com). 
 			 * Will add the URL when i have found it... */
-			"^(?:[:@]([^\\s]+) )?([^\\s]+)(?: ((?:[^:\\s][^\\s]* ?)*))?(?: ?:(.*))?$",
+			"^(?:[:@]([^\\s]+) )?([^\\s]+)(?: (?:(?:([^:\\s][^\\s]*) ?)*))?(?: ?:(.*))?$",
 #endif
 			0, 0, NULL);
 	if (!irc_msgsrc_regex_pattern)
