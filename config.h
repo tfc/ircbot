@@ -24,4 +24,14 @@ void config_free(config *conf);
 config_group* config_get_group(config *conf, char *groupname);
 char* config_get_value(config_group *group, char *key);
 
+/* Helper macro for getting strings from config objects.
+ * You really __have to__ define a pointer "g" 
+ * of type config_group* to the configuration group
+ * you are referring to.
+ */
+#define Conf(__key, __defaultval) ({ \
+		char *s = config_get_value(g, (__key)); \
+		s ? s : (__defaultval); \
+})
+
 #endif /* __CONFIG_H__ */

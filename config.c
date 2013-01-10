@@ -17,7 +17,7 @@ config* config_from_filename(char *filename)
 
 	/* Load the GKeyFile from keyfile.conf or return. */
 	if (!g_key_file_load_from_file (keyfile, filename, 0, &error)) {
-		printf("%s\n", error->message);
+		Printerr("%s\n", error->message);
 		return NULL;
 	}
 

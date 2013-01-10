@@ -12,8 +12,6 @@
 #include "config.h"
 #include "module_support.h"
 
-#define CONF(__key) (config_get_value(g, (__key)))
-
 static int handle_keyboard_input(irc_connection *con)
 {
 	char msg[512];
@@ -74,8 +72,12 @@ int main(int argc, char *argv[])
 	}
 	else if (argc == 1) {
 		config_group *g = config_get_group(conf, "irc");
-		irc_server = config_get_value(g, "server");
-		char *portstr = config_get_value(g, "port");
+		irc_server = Conf("server", "INVALID");
+		if (!strcmp(irc_server, "INVALID")) {
+			Printerr("No IRC server address given!\n");
+			return 1;
+		}
+		char *portstr = Conf("port", "6667");
 		assert(irc_server && portstr);
 		irc_port = atoi(portstr);
 	}
@@ -84,16 +86,20 @@ int main(int argc, char *argv[])
 
 	err = irc_connect(&con, irc_server, irc_port);
 	if (err) {
-		fprintf(stderr, "Got no connection.");
-		exit(1);
+		Printerr("Got no connection to IRC server!\n");
+		return 1;
 	}
 
 	module_load_module_dir(&con);
 
 	config_group *g = config_get_group(conf, "bot");
 
-	irc_set_nick(&con, CONF("nickname"));
-	irc_set_user(&con, CONF("username"), CONF("hostname"), CONF("servername"), CONF("realname"));
+	irc_set_nick(&con, Conf("nickname", "cbot"));
+	irc_set_user(&con, 
+			Conf("username", "cbot_user"), 
+			Conf("hostname", "cbot_host"), 
+			Conf("servername", "cbot_server"), 
+			Conf("realname", "The CBot!"));
 
 	max_descr = MAX(STDIN_FILENO, con.sockfd) + 1;
 

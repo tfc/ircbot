@@ -39,9 +39,14 @@
  */
 #define Sasprintf(write_to, ...) { \
 	char *__tmp_str = write_to; \
-	asprintf(&(write_to), __VA_ARGS); \
+	asprintf(&(write_to), __VA_ARGS__); \
 	free(__tmp_str); \
 }
+
+#define Printerr(...) do { \
+	fprintf(stderr, __VA_ARGS__); \
+} while(0)
+
 
 #endif /* __HELPERS_H__ */
 
