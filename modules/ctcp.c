@@ -14,13 +14,13 @@ static char *version_string = NULL;
 
 static int ctcp_ping(irc_connection *con, irc_msg *msg)
 {
-	gboolean ret;
+    gboolean ret;
 	GMatchInfo *info;
 
 	ret = g_regex_match(ping_pattern, msg->params, 0, &info);
 
 	int matches = g_match_info_get_match_count(info);
-	if (matches != 2) return 0;
+	if (!ret || matches != 2) return 0;
 
 	gchar *ping_id_str = g_match_info_fetch(info, 1);
 	Irc_send(con, "NOTICE %s :\001PING %s\001\n", msg->src_nick, ping_id_str);
@@ -37,7 +37,7 @@ static int ctcp_version(irc_connection *con, irc_msg *msg)
 	ret = g_regex_match(version_pattern, msg->params, 0, &info);
 
 	int matches = g_match_info_get_match_count(info);
-	if (matches != 1) return 0;
+	if (!ret || matches != 1) return 0;
 
 	Irc_send(con, "NOTICE %s :\001VERSION %s\001\n", 
 			msg->src_nick, version_string);
