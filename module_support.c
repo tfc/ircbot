@@ -66,13 +66,16 @@ static int module_add(irc_connection *con, config_group *group, const char *modu
 	module_close mod_close;
 
 	void* module_libfile = dlopen(module_file, RTLD_NOW | RTLD_LOCAL);
-	if (!module_libfile) return -1;
+	if (!module_libfile) {
+        Printerr("dlopen: %s\n", dlerror());
+        return -1;
+    }
 
 	module_message_handler module_msg_handler = dlsym(module_libfile, "module_message_handler");
 	if (!module_msg_handler) return -2;
 
 	LINK_FUNC(mod_generic_init, "init_module_generic", -3);
-	mod_generic_init(irc_send_raw_msg, group);
+	mod_generic_init(irc_send_raw_msg, config_get_value, group);
 	LINK_FUNC(mod_init, "module_init", -4);
 	LINK_FUNC(mod_msg_handler, "module_message_handler", -5);
 	LINK_FUNC(mod_close, "module_close", -6);

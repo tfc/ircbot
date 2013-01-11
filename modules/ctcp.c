@@ -6,6 +6,7 @@
 #include "module.h"
 #include "_module_init.c.inc"
 #include "../config.h"
+#include "../helpers.h"
 
 static GRegex *ping_pattern    = NULL;
 static GRegex *version_pattern = NULL;
@@ -56,7 +57,10 @@ int module_init(irc_connection *con)
 	ping_pattern = g_regex_new("^\001PING (.+)\001$", 0, 0, NULL);
 	version_pattern = g_regex_new("^\001VERSION\001$", 0, 0, NULL);
 
-	if (!ping_pattern || !version_pattern) return -1;
+	if (!ping_pattern || !version_pattern) {
+        Printerr("Could not compile regex patterns.\n");
+        return -1;
+    }
 
 	version_string = Conf("version", "plain C irc bot: https://github.com/tfc/ircbot");
 
