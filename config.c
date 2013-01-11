@@ -90,6 +90,8 @@ void config_dump(config *conf)
 config_group* config_get_group(config *conf, char *groupname)
 {
 	int i;
+	if (!conf) return NULL;
+
 	for (i=0; i < conf->group_count; i++)
 		if (!strcmp(groupname, conf->groups[i].name))
 			return &conf->groups[i];
@@ -100,6 +102,8 @@ config_group* config_get_group(config *conf, char *groupname)
 char *config_get_value(config_group *group, char *key)
 {
 	int n;
+	if (!group) return NULL;
+
 	for (n=0; n < group->pair_count; n++)
 		if (!strcmp(key, group->pairs[n].key))
 			return group->pairs[n].value;

@@ -265,6 +265,8 @@ irc_msg* irc_next_message(irc_connection *con)
 	if (matches == 5) Copy_match(msg_info, 4, ircmsg->params);
 	else 		  ircmsg->params = NULL;
 
+	ircmsg->command_num = atoi(ircmsg->command);
+
 	/* If the source string has the format "nick!user@host" then
 	 * we parse further to provide the user more substrings.
 	 */
