@@ -12,7 +12,7 @@ int module_handle_msg(irc_connection *con, irc_msg *msg);
  * What it does right now: look into ./modules/ and
  * load every module object file from there.
  */
-int module_load_module_dir(irc_connection *con);
+int module_load_module_dir(irc_connection *con, config *conf);
 
 #endif /* __MODULE_SUPPORT_H__ */
 

@@ -3,9 +3,11 @@
 #include <dlfcn.h>
 #include <dirent.h>
 #include <string.h>
+#include <assert.h>
 
 #include "helpers.h"
 #include "irc.h"
+#include "config.h"
 #include "module_support.h"
 #include "modules/module.h"
 
@@ -56,7 +58,7 @@ int module_handle_msg(irc_connection *con, irc_msg *msg)
 	return count;
 }
 
-static int module_add(irc_connection *con, const char *module_file)
+static int module_add(irc_connection *con, config_group *group, const char *module_file)
 {
 	init_module_func mod_generic_init;
 	module_message_handler mod_msg_handler;
@@ -70,7 +72,7 @@ static int module_add(irc_connection *con, const char *module_file)
 	if (!module_msg_handler) return -2;
 
 	LINK_FUNC(mod_generic_init, "init_module_generic", -3);
-	mod_generic_init(irc_send_raw_msg);
+	mod_generic_init(irc_send_raw_msg, group);
 	LINK_FUNC(mod_init, "module_init", -4);
 	LINK_FUNC(mod_msg_handler, "module_message_handler", -5);
 	LINK_FUNC(mod_close, "module_close", -6);
@@ -100,7 +102,7 @@ static int module_add(irc_connection *con, const char *module_file)
 	return 0;
 }
 
-int module_load_module_dir(irc_connection *con)
+int module_load_module_dir(irc_connection *con, config *conf)
 {
 	int ret;
 	DIR *module_dir = opendir("./modules");
@@ -123,8 +125,12 @@ int module_load_module_dir(irc_connection *con)
 		char *plug_path;
 		asprintf(&plug_path, "./modules/%s", filename);
 
-		printf("Loading module %20s ...\t", filename);
-		ret = module_add(con, plug_path);
+		char *_filename = strdup(filename);
+		char *modname = strtok(_filename, ".");
+		assert(modname);
+
+		printf("Loading module %20s ...\t", modname);
+		ret = module_add(con, config_get_group(conf, modname), plug_path);
 		if (!ret) {
 			modules_loaded++;
 			printf("OK!\n");
@@ -132,7 +138,7 @@ int module_load_module_dir(irc_connection *con)
 		else 
 			printf("Error! (%d)\n", ret);
 
-		free(plug_path);
+		Free_list(plug_path, modname);
 	}
 
 	return modules_loaded;

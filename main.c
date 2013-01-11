@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	module_load_module_dir(&con);
+	module_load_module_dir(&con, conf);
 
 	config_group *g = config_get_group(conf, "bot");
 

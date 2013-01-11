@@ -5,9 +5,12 @@
 
 #include "module.h"
 #include "_module_init.c.inc"
+#include "../config.h"
 
 static GRegex *ping_pattern    = NULL;
 static GRegex *version_pattern = NULL;
+
+static char *version_string = NULL;
 
 static int ctcp_ping(irc_connection *con, irc_msg *msg)
 {
@@ -37,7 +40,7 @@ static int ctcp_version(irc_connection *con, irc_msg *msg)
 	if (matches != 1) return 0;
 
 	Irc_send(con, "NOTICE %s :\001VERSION %s\001\n", 
-			msg->src_nick, "plain C irc bot: https://github.com/tfc/ircbot");
+			msg->src_nick, version_string);
 
 	return 1;
 }
@@ -54,6 +57,8 @@ int module_init(irc_connection *con)
 	version_pattern = g_regex_new("^\001VERSION\001$", 0, 0, NULL);
 
 	if (!ping_pattern || !version_pattern) return -1;
+
+	version_string = Conf("version", "plain C irc bot: https://github.com/tfc/ircbot");
 
 	return 0;
 }
