@@ -3,3 +3,4 @@ tags
 *.o
 *.dylib
 *.so
+ircb.conf

@@ -1,5 +1,5 @@
 [irc]
-server = irc.whing.org
+server = irc.quakenet.org
 port = 6667
 
 [bot]
@@ -13,4 +13,4 @@ realname = CBot Real Name
 version = plain C irc bot: https://github.com/tfc/ircbot
 
 [autojoin]
-channels = #talk
+channels = #c
