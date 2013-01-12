@@ -5,6 +5,7 @@
 
 #include "module.h"
 #include "_module_init.c.inc"
+#include "../irc_codes.h"
 #include "../config.h"
 #include "../helpers.h"
 
@@ -12,7 +13,7 @@ static char *channels = NULL;
 
 int module_message_handler(irc_connection *con, irc_msg *msg)
 {
-	if (strcmp(msg->command, "001")) return 0;
+	if (msg->command_num != RPL_ENDOFMOTD) return 0;
 
 	Irc_send(con, "JOIN %s\n", channels);
 
