@@ -128,6 +128,8 @@ int main(int argc, char *argv[])
 			running = handle_keyboard_input(&con) != -2;
 	}
 
+	module_unload_all(&con);
+
 	irc_close(&con, "bye.");
 	return 0;
 }

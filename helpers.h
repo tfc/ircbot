@@ -33,7 +33,7 @@
  */
 #define Free_list(...) FN_APPLY(void, free, __VA_ARGS__)
 
-/* Safe asprintf function. This is nice and handy for
+/* Safe asprintf function. This is nice and handy for 
  * multiple manipulations on the same string, since
  * it doesn't leak memory.
  */
