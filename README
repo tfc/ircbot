@@ -8,17 +8,22 @@ with loadable module support written in plain C.
 
 System Requirements
 -------------------
-You need some kind of UNIX (the code doesn't compile under Windows) and glib2.0
+- some kind of UNIX (neither written for Windows nor tested there)
+- glib2.0
 
 Getting Started
 -------------------
 
 To start the bot, just run 
 
+./bot
+
+configuration values are parsed from ircb.conf in the same folder.
+To override config values for server and port, run:
+
 ./bot <IRC server> <port>
 
 TODO
 -------------------
-- Bot settings like user name etc. are still hardcoded --> make this configurable.
 - The plugin framework will get some more extensions
 - Timer events for the plugins
