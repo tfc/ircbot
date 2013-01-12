@@ -6,7 +6,7 @@
 #include "helpers.h"
 #include "config.h"
 
-config* config_from_filename(char *filename)
+config* config_from_filename(const char *filename)
 {
 	config *retconf;
 	GError *error = NULL;
@@ -87,7 +87,7 @@ void config_dump(config *conf)
 
 }
 
-config_group* config_get_group(config *conf, char *groupname)
+config_group* config_get_group(config *conf, const char *groupname)
 {
 	int i;
 	if (!conf) return NULL;
@@ -99,7 +99,7 @@ config_group* config_get_group(config *conf, char *groupname)
 
 }
 
-char *config_get_value(config_group *group, char *key)
+char *config_get_value(config_group *group, const char *key)
 {
 	int n;
 	if (!group) return NULL;

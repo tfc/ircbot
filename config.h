@@ -17,12 +17,12 @@ typedef struct config {
 	config_group *groups;
 } config;
 
-config* config_from_filename(char *filename);
+config* config_from_filename(const char *filename);
 void config_dump(config *conf);
 void config_free(config *conf);
 
-config_group* config_get_group(config *conf, char *groupname);
-char* config_get_value(config_group *group, char *key);
+config_group* config_get_group(config *conf, const char *groupname);
+char* config_get_value(config_group *group, const char *key);
 
 /* Helper macro for getting strings from config objects.
  * You really __have to__ define a pointer "g" 

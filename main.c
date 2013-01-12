@@ -12,6 +12,8 @@
 #include "config.h"
 #include "module_support.h"
 
+config *conf = NULL;
+
 static int handle_keyboard_input(irc_connection *con)
 {
 	char msg[512];
@@ -59,7 +61,7 @@ int main(int argc, char *argv[])
 	unsigned irc_port;
 	char *irc_server;
 
-	config *conf = config_from_filename("ircb.conf");
+	conf = config_from_filename("ircb.conf");
 	assert(conf);
 
 	if (argc == 3) {
