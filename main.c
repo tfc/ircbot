@@ -22,6 +22,7 @@ static int handle_keyboard_input(irc_connection *con)
 	int retval = 0;
 	char *ret = fgets(msg, 511, stdin);
 	if (!ret) return -1;
+	if (strlen(ret) < 2) return 0;
 
 	char *parse = strdup(msg);
 	char *cmd = strtok(parse, " \n");
