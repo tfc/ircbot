@@ -139,6 +139,8 @@ static int module_add(irc_connection *con, config_group *group, const char *modu
 	else
 		con->modules = p;
 
+	con->module_count++;
+
 	return 0;
 }
 
@@ -176,6 +178,8 @@ int module_unload(irc_connection *con, const char *module_name)
 	else 		l2->next = l->next;
 
 	free_module(l);
+
+	con->module_count--;
 
 	return ret;
 }
@@ -234,3 +238,21 @@ void module_unload_all(irc_connection *con)
 
 	con->modules = NULL;
 }
+
+
+char** module_loaded_modules(irc_connection *con)
+{
+	unsigned i;
+	char **names = malloc(sizeof(char**) * (con->module_count + 1));
+	module_listitem *m = con->modules;
+
+	for (i=0; i < con->module_count; i++) {
+		assert(m);
+		names[i] = m->name;
+		m = m->next;
+	}
+	names[i] = NULL;
+
+	return names;
+}
+

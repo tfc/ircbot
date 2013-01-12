@@ -106,6 +106,7 @@ int irc_connect(irc_connection *con, char *hostname, int port)
 	irc_connections++;
 
 	con->modules = NULL;
+	con->module_count = 0;
 
 	return 0;
 }

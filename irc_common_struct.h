@@ -25,6 +25,7 @@ typedef struct irc_connection {
 	char *realname;
 
 	void *modules;
+	int module_count;
 } irc_connection;
 
 /*

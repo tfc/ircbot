@@ -46,6 +46,14 @@ static int handle_keyboard_input(irc_connection *con)
 		if (!mod_ret) printf("OK!\n");
 		else	      printf("Error (%d)!\n", mod_ret);
 	}
+	else if (Is_cmd("modules")) {
+		printf("Currently loaded modules:\n");
+		char **modules = module_loaded_modules(con);
+		int i;
+		for (i=0; modules[i]; i++)
+			printf(" - %15s\n", modules[i]);
+		free(modules);
+	}
 	else 
 		retval = irc_send_raw_msg(con, msg);
 

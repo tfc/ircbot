@@ -26,5 +26,10 @@ int module_unload(irc_connection *con, const char *module_name);
  */
 void module_unload_all(irc_connection *con);
 
+/* Get a (NULL-terminated) list of name strings
+ * of the modules currently loaded.
+ */
+char** module_loaded_modules(irc_connection *con);
+
 #endif /* __MODULE_SUPPORT_H__ */
 
