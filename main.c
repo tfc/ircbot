@@ -14,16 +14,43 @@
 
 config *conf = NULL;
 
+#define Is_cmd(__cmd) (!strcmp(cmd, __cmd))
+
 static int handle_keyboard_input(irc_connection *con)
 {
 	char msg[512];
+	int retval = 0;
 	char *ret = fgets(msg, 511, stdin);
 	if (!ret) return -1;
 
-	/* user input "q" quits the whole application. */
-	if (!strcmp(msg, "q\n")) return -2;
+	char *parse = strdup(msg);
+	char *cmd = strtok(parse, " \n");
 
-	return irc_send_raw_msg(con, msg);
+	if (Is_cmd("q")) {
+		/* user input "q" quits the whole application. */
+		retval = -2;
+	}
+	else if (Is_cmd("load")) {
+		char *modname = strtok(NULL, " \n");
+		printf("Loading module %15s ... ", modname);
+
+		int mod_ret = module_load(con, conf, modname);
+		if (!mod_ret) printf("OK!\n");
+		else	      printf("Error (%d)!\n", mod_ret);
+	}
+	else if (Is_cmd("unload")) {
+		char *modname = strtok(NULL, " \n");
+		printf("Unloading module %15s ... ", modname);
+
+		int mod_ret = module_unload(con, modname);
+		if (!mod_ret) printf("OK!\n");
+		else	      printf("Error (%d)!\n", mod_ret);
+	}
+	else 
+		retval = irc_send_raw_msg(con, msg);
+
+	free(parse);
+	return retval;
 }
 
 static int handle_irc_messages(irc_connection *con)
