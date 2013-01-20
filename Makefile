@@ -2,7 +2,6 @@ EXECUTABLE=bot
 OBJECTS=main.o irc.o module_support.o config.o
 CFLAGS:=-g -Wall -Werror `pkg-config --cflags glib-2.0`
 LIBS:=`pkg-config --libs glib-2.0`
-TESTSERVER=localhost
 
 PLATFORM:=$(shell uname)
 ifeq ($(PLATFORM), Darwin)
@@ -21,5 +20,3 @@ clean:
 	rm -f $(EXECUTABLE) $(OBJECTS)
 	make -C modules clean
 
-run: all
-	./$(EXECUTABLE) $(TESTSERVER) 6667

@@ -1,20 +1,22 @@
-CFLAGS:=-g -Wall -Werror `pkg-config --cflags glib-2.0`
-LIBS:=`pkg-config --libs glib-2.0`
+CFLAGS:=-g -Wall -Werror `pkg-config --cflags glib-2.0` `curl-config --cflags`
+LIBS:=`pkg-config --libs glib-2.0` `curl-config --libs`
 
 PLATFORM:=$(shell uname)
 ifeq ($(PLATFORM), Darwin)
+
 MODULE_SUFFIX:=.dylib
 
 %.dylib: %.o
-	gcc -dynamiclib -undefined suppress -flat_namespace $< -o $@
+	$(CC) -dynamiclib -undefined suppress -flat_namespace $< -o $@ $(LIBS)
 
 else
+
 MODULE_SUFFIX:=.so
 CFLAGS:=$(CFLAGS) -fPIC -D_GNU_SOURCE
-LIBS:=$(LIBS) -ldl
+LIBS:=$(LIBS) -ldl -rdynamic
 
 %.so: %.o
-	gcc -shared $< -o $@
+	$(CC) -shared $< -o $@ $(LIBS)
 
 endif
 
