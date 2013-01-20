@@ -1,0 +1,59 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <glib.h>
+#include <time.h>
+
+#include "module.h"
+#include "_module_init.c.inc"
+#include "../config.h"
+#include "../helpers.h"
+
+static GRegex *match_pattern = NULL;
+
+static char *answers[] = {
+	"Dies das halt.",
+	"Ist halt so.",
+	"Kann man nix machen.",
+	"Import, Export!",
+	"Kommt drauf an, wen man fragt.",
+	"Je nach dem!"
+};
+
+static int num_answers = sizeof(answers) / sizeof(answers[0]);
+
+int module_message_handler(irc_connection *con, irc_msg *msg)
+{
+	GMatchInfo *info;
+	gboolean ret; 
+
+	if (!match_pattern || !msg->params) return 0;
+
+	ret = g_regex_match(match_pattern, msg->params, 0, &info);
+	if (!ret) return 0;
+
+	Irc_send(con, "PRIVMSG %s :%s: %s\n", 
+			msg->target, msg->src_nick, 
+			answers[rand() % num_answers]);
+
+	return 0;
+}
+
+int module_init(irc_connection *con)
+{
+	// The default pattern ??? will not compile. This deactivates the whole module.
+	match_pattern = g_regex_new("\\?$", 0, 0, NULL);
+	if (!match_pattern) {
+		Printerr("Could not compile regex patterns.\n");
+		return -1;
+	}
+
+	srand (time(NULL));
+
+	return 0;
+}
+
+void module_close(void) 
+{
+	g_regex_unref(match_pattern);
+}
