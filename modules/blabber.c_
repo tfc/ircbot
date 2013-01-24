@@ -9,6 +9,8 @@
 #include "../config.h"
 #include "../helpers.h"
 
+#define PROBABILITY 5
+
 static GRegex *match_pattern = NULL;
 
 static char *answers[] = {
@@ -17,7 +19,15 @@ static char *answers[] = {
 	"Kann man nix machen.",
 	"Import, Export!",
 	"Kommt drauf an, wen man fragt.",
-	"Je nach dem!"
+	"Je nach dem!",
+	"Wir sind hier nicht bei wünsch Dir was!",
+	"Weil halt.",
+	"Darum halt.",
+	"Warum auch nicht?",
+	"Das hat Deine Großmutter auch immer gefragt.",
+	"Du wirst alt.",
+	"Und das von einem der nur einmal im Monat duscht.",
+	"Wasch Dich mal wieder."
 };
 
 static int num_answers = sizeof(answers) / sizeof(answers[0]);
@@ -32,9 +42,12 @@ int module_message_handler(irc_connection *con, irc_msg *msg)
 	ret = g_regex_match(match_pattern, msg->params, 0, &info);
 	if (!ret) return 0;
 
+  unsigned prob = (unsigned)((double)rand() * PROBABILITY / RAND_MAX);
+  if (prob) return 0;
+
 	Irc_send(con, "PRIVMSG %s :%s: %s\n", 
 			msg->target, msg->src_nick, 
-			answers[rand() % num_answers]);
+			answers[(unsigned)((double)rand() * num_answers / RAND_MAX)]);
 
 	return 0;
 }
